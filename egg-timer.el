@@ -98,7 +98,7 @@
  * #'your-function in which case it'll run the function and
    pass it the label
 
-It will default to message.")
+It will fall back to message if nothing else works.")
 
 (defvar egg-timer-running-timers nil "Stores the running timers for egg-timer.el")
 
@@ -212,7 +212,7 @@ clear what the timer is for."
         (let* ((unit (string-to-number (match-string 1 timedesc)))
                (measure (match-string 2 timedesc))
                (commentary (if (match-string 3 timedesc)
-                               (string-trim-whitespace (match-string 3 timedesc))
+                               (string-trim (match-string 3 timedesc))
                              nil))
                (exists (assoc measure timer-duration-words)))
           (message "got '%s' '%s' '%s'" unit measure commentary)
@@ -343,7 +343,14 @@ with the correct amount of units on the end."
         (message "%s timer scheduled." actual-label)))))
 
 (defun egg-timer-schedule ()
-  "Select and schedule a timer for a given set of time intervals."
+  "Select and schedule a timer for a given set of time intervals.
+
+Offers a choice of strings from 'egg-timer-intervals' but is happy to try and parse what the user requested in the form of strings that look like this: 
+'<unit> <measure> [<optional description>]'
+
+e.g. '3 seconds' or '3 hours' or '25 minutes turn down oven'
+produce timers that run for 3 second, or 3 hour, or 25 minutes
+and has the option description of 'turn down oven'."
   (interactive)
   (let* ((key (completing-read "Set timer for: " egg-timer-intervals))
          (val (alist-get key egg-timer-intervals nil nil #'string=)))
